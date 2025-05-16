@@ -9,6 +9,7 @@ from clickhouse_driver import Client
 
 
 def get_ch_client():
+    """Get Clickhouse Client"""
     return Client(
         host='localhost',
         port=9000,

@@ -8,30 +8,31 @@ Project: Stealer
 import requests
 import os
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict
 from dotenv import load_dotenv
 
 from app.db import Client, get_ch_client
-from app.main import test_api
+from app.queries import QUERIES
 
 load_dotenv()
 token = os.getenv("API_TOKEN")
 
 class Stealer:
     def __init__(self, api_key: str, ch_client: Client):
+        """Stealer Initial"""
         self.api_url = "https://api.football-data.org/v4"
         self.headers = {"X-Auth-Token": api_key}
         self.ch_client = ch_client
 
     def get_existing_match_ids(self) -> set:
-        """Получаем ID матчей, которые уже есть в БД"""
+        """Get matches ID already in db"""
         query = "SELECT id FROM project.matches"
         res = self.ch_client.execute(query)
         return {row[0] for row in res}
 
     def fetch_matches(self, days: int = 1) -> List[Dict]:
-        """Получаем матчи за последние N дней"""
+        """Get matches of last N days"""
         date_to = datetime.now()
         date_from = date_to - timedelta(days=days)
 
@@ -48,23 +49,26 @@ class Stealer:
         return response.json().get('matches', [])
 
     def transform_match(self, match: Dict) -> Dict:
-        """Преобразуем структуру API под нашу таблицу"""
+        """Transform API response structure into table structure"""
+        date_str = match['utcDate'].replace('Z', '+00:00')
+        utc_date = datetime.fromisoformat(date_str)
+
         return {
             'id': match['id'],
             'area_name': match['area']['name'],
             'competition_name': match['competition']['name'],
             'home_team': match['homeTeam']['name'],
             'away_team': match['awayTeam']['name'],
-            'utc_date': match['utcDate'],
+            'utc_date': utc_date,  # datetime объект
             'status': match['status'],
             'home_score': match.get('score', {}).get('fullTime', {}).get('home'),
             'away_score': match.get('score', {}).get('fullTime', {}).get('away'),
             'winner': match.get('score', {}).get('winner'),
-            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'last_updated': datetime.now()  # datetime объект, а не строка
         }
 
     def update_matches(self):
-        """Основной метод обновления данных"""
+        """Start method"""
         existing_ids = self.get_existing_match_ids()
         matches = self.fetch_matches(days=3)  # Берем матчи за 3 дня
 
@@ -76,29 +80,32 @@ class Stealer:
 
         if new_matches:
             self.insert_matches(new_matches)
-            print(f"Добавлено {len(new_matches)} новых матчей")
+            print(f"Added {len(new_matches)} new matches")
         else:
-            print("Новых матчей не найдено")
+            print("No new matches found")
 
     def insert_matches(self, matches: List[Dict]):
-        """Пакетная вставка в ClickHouse"""
-        query = """
-        INSERT INTO project.matches (
-            id
-            , area_name
-            , competition_name
-            , home_team
-            , away_team
-            , utc_date
-            , status
-            , home_score
-            , away_score
-            , winner
-            , last_updated
-        ) VALUES """
-        self.ch_client.execute(query, matches)
+        """Insert into Clickhouse"""
+        data = [
+            (
+                match['id'],
+                match['area_name'],
+                match['competition_name'],
+                match['home_team'],
+                match['away_team'],
+                match['utc_date'],
+                match['status'],
+                match['home_score'],
+                match['away_score'],
+                match['winner'],
+                match['last_updated']
+            )
+            for match in matches
+        ]
+        query = QUERIES['insert_matches']
+        self.ch_client.execute(query, data)
 
 
 client = get_ch_client()
 stealer = Stealer(token, client)
-print(stealer.fetch_matches(3))
+stealer.update_matches()

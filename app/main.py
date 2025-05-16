@@ -11,14 +11,13 @@ import requests
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 app = FastAPI()
 
 @app.get("/test")
 def test_api():
-    """Ручка для проверки выгрузки."""
+    """Handler to check download."""
     token = os.getenv("API_TOKEN")
     response = requests.get(
         "https://api.football-data.org/v4/matches",
@@ -32,5 +31,5 @@ def test_api():
 
 @app.get("/health")
 def health():
-    """Ручка для проверки работы."""
+    """Healthcheck."""
     return {"status": "OK"}
