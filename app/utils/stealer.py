@@ -13,6 +13,7 @@ from typing import List, Dict
 from dotenv import load_dotenv
 
 from app.db import Client, get_ch_client
+from app.main import test_api
 
 load_dotenv()
 token = os.getenv("API_TOKEN")
@@ -31,11 +32,17 @@ class Stealer:
 
     def fetch_matches(self, days: int = 1) -> List[Dict]:
         """Получаем матчи за последние N дней"""
-        date_from = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
+        date_to = datetime.now()
+        date_from = date_to - timedelta(days=days)
+
+        params = {
+            "dateFrom": date_from.strftime("%Y-%m-%d"),
+            "dateTo": date_to.strftime("%Y-%m-%d")
+        }
         response = requests.get(
             f"{self.api_url}/matches",
             headers=self.headers,
-            params={'dateFrom': date_from}
+            params=params
         )
         response.raise_for_status()
         return response.json().get('matches', [])
@@ -94,5 +101,4 @@ class Stealer:
 
 client = get_ch_client()
 stealer = Stealer(token, client)
-m = stealer.get_existing_match_ids()
-print(m)
+print(stealer.fetch_matches(3))
