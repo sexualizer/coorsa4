@@ -12,7 +12,11 @@ def test_api():
     token = os.getenv("API_TOKEN")
     response = requests.get(
         "https://api.football-data.org/v4/matches",
-        headers={"X-Auth-Token": token}
+        headers={"X-Auth-Token": token},
+        params={
+            'sort': 'date',
+            'order': 'asc'
+        }
     )
     return response.json()
 
