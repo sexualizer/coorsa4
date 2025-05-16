@@ -8,12 +8,12 @@ Project: Stealer
 import requests
 import os
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import List, Dict
 from dotenv import load_dotenv
 
-from app.db import Client, get_ch_client
-from app.queries import QUERIES
+from app.utils.db import Client, get_ch_client
+from app.utils.queries import QUERIES
 
 load_dotenv()
 token = os.getenv("API_TOKEN")
@@ -70,7 +70,7 @@ class Stealer:
     def update_matches(self):
         """Start method"""
         existing_ids = self.get_existing_match_ids()
-        matches = self.fetch_matches(days=3)  # Берем матчи за 3 дня
+        matches = self.fetch_matches(days=4) #Put a number of days here
 
         new_matches = [
             self.transform_match(m)
