@@ -11,14 +11,17 @@ import requests
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
+from app.utils.stealer import Stealer
+from app.utils.db import get_ch_client
+
 load_dotenv()
+token = os.getenv("API_TOKEN")
 
 app = FastAPI()
 
 @app.get("/test")
 def test_api():
     """Handler to check download."""
-    token = os.getenv("API_TOKEN")
     response = requests.get(
         "https://api.football-data.org/v4/matches",
         headers={"X-Auth-Token": token},
@@ -33,3 +36,8 @@ def test_api():
 def health():
     """Healthcheck."""
     return {"status": "OK"}
+
+client = get_ch_client()
+stealer = Stealer(token, client)
+stealer.update_matches()
+

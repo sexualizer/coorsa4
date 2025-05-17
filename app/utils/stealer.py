@@ -13,7 +13,7 @@ from typing import List, Dict
 from dotenv import load_dotenv
 
 from app.utils.db import Client, get_ch_client
-from app.utils.queries import QUERIES
+from app.kafka.producer import Producer
 
 load_dotenv()
 token = os.getenv("API_TOKEN")
@@ -24,6 +24,7 @@ class Stealer:
         self.api_url = "https://api.football-data.org/v4"
         self.headers = {"X-Auth-Token": api_key}
         self.ch_client = ch_client
+        self.kafka_producer = Producer('kafka:9092')
 
     def get_existing_match_ids(self) -> set:
         """Get matches ID already in db"""
@@ -32,7 +33,7 @@ class Stealer:
         return {row[0] for row in res}
 
     def fetch_matches(self, days: int = 1) -> List[Dict]:
-        """Get matches of last N days"""
+        """Get matches of last N days and send them to topic"""
         date_to = datetime.now()
         date_from = date_to - timedelta(days=days)
 
@@ -70,7 +71,7 @@ class Stealer:
     def update_matches(self):
         """Start method"""
         existing_ids = self.get_existing_match_ids()
-        matches = self.fetch_matches(days=4) #Put a number of days here
+        matches = self.fetch_matches(days=5) #Put a number of days here
 
         new_matches = [
             self.transform_match(m)
@@ -79,33 +80,10 @@ class Stealer:
         ]
 
         if new_matches:
-            self.insert_matches(new_matches)
-            print(f"Added {len(new_matches)} new matches")
+            success_count = sum(
+                1 for m in new_matches
+                if self.kafka_producer.send_match('matches', m)
+            )
+            print(f"Sent {success_count}/{len(new_matches)} to Kafka")
         else:
             print("No new matches found")
-
-    def insert_matches(self, matches: List[Dict]):
-        """Insert into Clickhouse"""
-        data = [
-            (
-                match['id'],
-                match['area_name'],
-                match['competition_name'],
-                match['home_team'],
-                match['away_team'],
-                match['utc_date'],
-                match['status'],
-                match['home_score'],
-                match['away_score'],
-                match['winner'],
-                match['last_updated']
-            )
-            for match in matches
-        ]
-        query = QUERIES['insert_matches']
-        self.ch_client.execute(query, data)
-
-
-client = get_ch_client()
-stealer = Stealer(token, client)
-stealer.update_matches()
