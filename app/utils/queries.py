@@ -1,4 +1,14 @@
+"""
+Clickhouse queries.
+Author: sexualizer
+Date: 09.05.2025
+Project: Stealer
+"""
+
 QUERIES = {
+    'test_conn': """
+    SELECT 1
+    """,
     'insert_matches' : """
     INSERT INTO project.matches (
             id
@@ -13,5 +23,8 @@ QUERIES = {
             , winner
             , last_updated
         ) VALUES 
+    """,
+    'get_matches_id': """
+    SELECT id FROM project.matches
     """
 }

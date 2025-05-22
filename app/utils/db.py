@@ -6,6 +6,7 @@ Project: Stealer
 """
 
 from clickhouse_driver import Client
+from app.utils.queries import QUERIES
 
 
 def get_ch_client():
@@ -19,7 +20,7 @@ def get_ch_client():
     )
 try:
     ch_client = get_ch_client()
-    test = ch_client.execute("select 1;")
-    print("Connected to localhost:9000 in 'project' as admin")
+    test = ch_client.execute(QUERIES['test_conn'])
+    print("Connected to Clickhouse at localhost:9000 in 'project' as admin")
 except Exception as e:
     print(f"Caught exception while connecting to localhost:9000 - {e}")

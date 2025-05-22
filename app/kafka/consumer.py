@@ -19,11 +19,19 @@ class Consumer:
         """KafkaConsumer Initial"""
         self.consumer = KafkaConsumer(
             topic,
-            bootstrap_servers='kafka:9092',
+            bootstrap_servers='localhost:9092',
             auto_offset_reset='earliest',
             value_deserializer=lambda x: json.loads(x.decode('utf-8')),
             api_version=(2, 5, 0))
+        self.test_conn()
         self.ch_client = get_ch_client()
+
+    def test_conn(self):
+        try:
+            self.consumer.bootstrap_connected()
+            print("Connected to Kafka at localhost:9092")
+        except Exception as e:
+            print(f"Consumer - Caught exception while trying to connect to Kafka at localhost:9092: {e}")
 
     def process_messages(self):
         """Processing message from topic"""
@@ -41,4 +49,4 @@ class Consumer:
             except Exception as e:
                 print(f"[Kafka] Processing error: {e}")
 
-#consumer = Consumer()
+consumer = Consumer(topic='matches')

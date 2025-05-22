@@ -40,4 +40,3 @@ def health():
 client = get_ch_client()
 stealer = Stealer(token, client)
 stealer.update_matches()
-

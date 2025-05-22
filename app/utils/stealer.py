@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 
 from app.utils.db import Client, get_ch_client
 from app.kafka.producer import Producer
+from app.utils.queries import QUERIES
 
 load_dotenv()
 token = os.getenv("API_TOKEN")
@@ -24,11 +25,11 @@ class Stealer:
         self.api_url = "https://api.football-data.org/v4"
         self.headers = {"X-Auth-Token": api_key}
         self.ch_client = ch_client
-        self.kafka_producer = Producer('kafka:9092')
+        self.kafka_producer = Producer('localhost:9092')
 
     def get_existing_match_ids(self) -> set:
         """Get matches ID already in db"""
-        query = "SELECT id FROM project.matches"
+        query = QUERIES['get_matches_id']
         res = self.ch_client.execute(query)
         return {row[0] for row in res}
 
@@ -60,12 +61,12 @@ class Stealer:
             'competition_name': match['competition']['name'],
             'home_team': match['homeTeam']['name'],
             'away_team': match['awayTeam']['name'],
-            'utc_date': utc_date,  # datetime объект
+            'utc_date': utc_date,
             'status': match['status'],
             'home_score': match.get('score', {}).get('fullTime', {}).get('home'),
             'away_score': match.get('score', {}).get('fullTime', {}).get('away'),
             'winner': match.get('score', {}).get('winner'),
-            'last_updated': datetime.now()  # datetime объект, а не строка
+            'last_updated': datetime.now()
         }
 
     def update_matches(self):
