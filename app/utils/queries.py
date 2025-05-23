@@ -24,7 +24,13 @@ QUERIES = {
             , last_updated
         ) VALUES 
     """,
-    'get_matches_id': """
+    'get_matches_id': f"""
     SELECT id FROM project.matches
+    """,
+    'insert_log': f"""
+    INSERT INTO project.logs (
+        time, log
+    ) VALUES 
     """
+
 }
