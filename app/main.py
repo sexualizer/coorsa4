@@ -41,14 +41,12 @@ def health():
 client = get_ch_client()
 consumer = Consumer()
 stealer = Stealer(token, client)
-consumer.read_msg()
 #stealer.update_matches()
 
-consumer.close_connections()
-# try:
-#     consumer.process_messages()
-# except KeyboardInterrupt:
-#     print("Shutting down gracefully...")
-#     consumer.close_connections()
+try:
+    consumer.read_msg()
+except KeyboardInterrupt:
+    print("Shutting down gracefully...")
+    consumer.close_connections()
 
 

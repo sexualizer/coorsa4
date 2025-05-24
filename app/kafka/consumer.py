@@ -5,8 +5,6 @@ Date: 09.05.2025
 Project: Stealer
 """
 
-import json
-
 from kafka import KafkaConsumer
 from datetime import datetime
 
@@ -22,6 +20,8 @@ class Consumer:
             'matches',
             bootstrap_servers='localhost:29092',
             auto_offset_reset='earliest',
+            enable_auto_commit=True,
+            #group_id='',
             value_deserializer=lambda x: x.decode('utf-8')
         )
         print('Consumer init')
@@ -30,6 +30,7 @@ class Consumer:
 
     def read_msg(self):
         self.consumer.subscribe(['logs'])
+        #self.consumer.group_id = 'logs_group'
         print("Reading messages...")
 
         for message in self.consumer:
@@ -44,13 +45,16 @@ class Consumer:
                     [log_data]
                 )
                 print(f"Inserted log: {message.value}")
+                #self.consumer.commit()
+
+        self.consumer.close()
+
 
 
     def close_connections(self):
         msg = {'message': f"Kafka: Close connection {datetime.now()}"}
-        self.ch_client.execute(QUERIES['insert_log'], msg)
+        # self.ch_client.execute(QUERIES['insert_log'], msg)
         self.consumer.close()
-        self.consumer.disconnect()
 
     def process_messages(self):
         """Processing message from topic"""
