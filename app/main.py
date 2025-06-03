@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 
 from app.utils.stealer import Stealer
-from app.kafka.consumer import Consumer
+#from app.kafka.consumer import Consumer
 from app.utils.db import get_ch_client
 
 load_dotenv()
@@ -39,14 +39,14 @@ def health():
     return {"status": "OK"}
 
 client = get_ch_client()
-consumer = Consumer()
+# consumer = Consumer()
 stealer = Stealer(token, client)
-#stealer.update_matches()
+stealer.update_matches()
 
-try:
-    consumer.read_msg()
-except KeyboardInterrupt:
-    print("Shutting down gracefully...")
-    consumer.close_connections()
+# try:
+#     consumer.read_msg()
+# except KeyboardInterrupt:
+#     print("Shutting down gracefully...")
+#     consumer.close_connections()
 
 

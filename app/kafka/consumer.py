@@ -72,4 +72,5 @@ class Consumer:
             except Exception as e:
                 print(f"[Kafka] Processing error: {e}")
         self.consumer.close()
-#consumer = Consumer()
+
+consumer = Consumer()

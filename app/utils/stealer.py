@@ -11,7 +11,7 @@ import os
 from datetime import datetime, timedelta
 from typing import List, Dict
 from dotenv import load_dotenv
-from kafka import KafkaProducer
+#from kafka import KafkaProducer
 
 from app.utils.db import Client
 from app.utils.queries import QUERIES
@@ -25,12 +25,12 @@ class Stealer:
         self.api_url = "https://api.football-data.org/v4"
         self.headers = {"X-Auth-Token": api_key}
         self.ch_client = ch_client
-        self.producer = KafkaProducer(
-            bootstrap_servers='localhost:29092',
-            value_serializer=lambda v: str(v).encode('utf-8')
-        )
-        print('Producer init')
-        self.open_conn()
+        # self.producer = KafkaProducer(
+        #     bootstrap_servers='localhost:29092',
+        #     value_serializer=lambda v: str(v).encode('utf-8')
+        # )
+        # print('Producer init')
+        # self.open_conn()
 
     def open_conn(self):
         """Connection test"""
@@ -98,7 +98,7 @@ class Stealer:
     def update_matches(self):
         """Initial method"""
         existing_ids = self.get_existing_match_ids()
-        matches = self.fetch_matches(days=5) #Put a number of days here
+        matches = self.fetch_matches(days=10) #Put a number of days here
 
         new_matches = [
             self.transform_match(m)
@@ -106,11 +106,18 @@ class Stealer:
             if m['id'] not in existing_ids
         ]
 
+        #print(new_matches)
         if new_matches:
-            success_count = 0
-            for match in new_matches:
-                if self.producer.send('matches', value=match):
-                    success_count += 1
-            print(f"Sent {success_count}/{len(new_matches)} to Kafka")
+            self.ch_client.execute(QUERIES['insert_matches'] ,new_matches)
+            print(f"Добавлено {len(new_matches)} новых матчей")
         else:
-            print("No new matches found")
+            print("Новых матчей не найдено")
+
+        # if new_matches:
+        #     success_count = 0
+        #     for match in new_matches:
+        #         if self.producer.send('matches', value=match):
+        #             success_count += 1
+        #     print(f"Sent {success_count}/{len(new_matches)} to Kafka")
+        # else:
+        #     print("No new matches found")
