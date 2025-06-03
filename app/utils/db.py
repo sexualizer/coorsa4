@@ -22,5 +22,6 @@ try:
     ch_client = get_ch_client()
     test = ch_client.execute(QUERIES['test_conn'])
     print("Connected to Clickhouse at localhost:9000 in 'project' as admin")
+    #ch_client.execute(QUERIES['init_db'])
 except Exception as e:
     print(f"Caught exception while connecting to localhost:9000 - {e}")

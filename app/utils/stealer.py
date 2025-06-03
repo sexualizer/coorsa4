@@ -32,26 +32,26 @@ class Stealer:
         # print('Producer init')
         # self.open_conn()
 
-    def open_conn(self):
-        """Connection test"""
-        try:
-            msg = f'Kafka: Open connection {datetime.now()}'
-            self.producer.send('logs', value=msg)
-            print(f"Kafka: Producer sent - {msg}")
-            self.producer.flush()
-        except Exception as e:
-            print(f"Producer - Caught exception while trying to connect to Kafka at localhost:29092: {e}")
-
-    def send_msg(self, topic: str, msg: dict):
-        """Send message into topic"""
-        try:
-            self.producer.send(topic, msg)
-        except Exception as e:
-            print(f"Catch error while trying to send message into {topic} - {e}")
-
-    def flush(self):
-        """Flush pending messages"""
-        self.producer.flush()
+    # def open_conn(self):
+    #     """Connection test"""
+    #     try:
+    #         msg = f'Kafka: Open connection {datetime.now()}'
+    #         self.producer.send('logs', value=msg)
+    #         print(f"Kafka: Producer sent - {msg}")
+    #         self.producer.flush()
+    #     except Exception as e:
+    #         print(f"Producer - Caught exception while trying to connect to Kafka at localhost:29092: {e}")
+    #
+    # def send_msg(self, topic: str, msg: dict):
+    #     """Send message into topic"""
+    #     try:
+    #         self.producer.send(topic, msg)
+    #     except Exception as e:
+    #         print(f"Catch error while trying to send message into {topic} - {e}")
+    #
+    # def flush(self):
+    #     """Flush pending messages"""
+    #     self.producer.flush()
 
     def get_existing_match_ids(self) -> set:
         """Get matches ID already in db"""
@@ -98,7 +98,7 @@ class Stealer:
     def update_matches(self):
         """Initial method"""
         existing_ids = self.get_existing_match_ids()
-        matches = self.fetch_matches(days=10) #Put a number of days here
+        matches = self.fetch_matches(days=15) #Put a number of days here
 
         new_matches = [
             self.transform_match(m)
@@ -109,9 +109,9 @@ class Stealer:
         #print(new_matches)
         if new_matches:
             self.ch_client.execute(QUERIES['insert_matches'] ,new_matches)
-            print(f"Добавлено {len(new_matches)} новых матчей")
+            print(f"Inserted {len(new_matches)} new matches")
         else:
-            print("Новых матчей не найдено")
+            print("New matches are not found")
 
         # if new_matches:
         #     success_count = 0
