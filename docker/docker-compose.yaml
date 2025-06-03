@@ -27,24 +27,24 @@ x-airflow-common:
       condition: service_healthy
 
 services:
-#  clickhouse:
-#    image: clickhouse/clickhouse-server:23.3
-#    container_name: clickhouse
-#    ports:
-#      - "8123:8123"
-#      - "9000:9000"
-#      - "9009:9009"
-#    volumes:
-#      - clickhouse_data:/var/lib/clickhouse
-#    environment:
-#      CLICKHOUSE_DB: project
-#      CLICKHOUSE_USER: admin
-#      CLICKHOUSE_PASSWORD: password
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 10
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.3
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_DB: project
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: password
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 #    networks:
 #      - kafka_network
 #
@@ -91,19 +91,19 @@ services:
 #    networks:
 #      - kafka_network
 #
-#  grafana:
-#    image: grafana/grafana:latest
-#    container_name: grafana
-#    ports:
-#      - "3000:3000"
-#    volumes:
-#      - grafana_data:/var/lib/grafana
-#      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-#    environment:
-#      GF_INSTALL_PLUGINS: vertamedia-clickhouse-datasource
-#      GF_SECURITY_ADMIN_USER: admin
-#      GF_SECURITY_ADMIN_PASSWORD: admin
-#      GF_USERS_ALLOW_SIGN_UP: "false"
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      GF_INSTALL_PLUGINS: vertamedia-clickhouse-datasource
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
 #    networks:
 #      - kafka_network
 
@@ -298,10 +298,10 @@ services:
 
 
 volumes:
-#  clickhouse_data:
+  clickhouse_data:
 #  zookeeper_data:
 #  kafka_data:
-#  grafana_data:
+  grafana_data:
   postgres-db-volume:
 
 #networks:
