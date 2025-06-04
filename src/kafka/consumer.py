@@ -8,8 +8,8 @@ Project: Stealer
 from kafka import KafkaConsumer
 from datetime import datetime
 
-from app.utils.queries import QUERIES
-from app.utils.db import get_ch_client
+from src.utils.queries import QUERIES
+from src.utils.db import get_ch_client
 
 
 class Consumer:

@@ -6,7 +6,7 @@ Project: Stealer
 """
 
 from clickhouse_driver import Client
-from app.utils.queries import QUERIES
+from src.utils.queries import QUERIES
 
 
 def get_ch_client():
@@ -21,7 +21,11 @@ def get_ch_client():
 try:
     ch_client = get_ch_client()
     test = ch_client.execute(QUERIES['test_conn'])
-    print("Connected to Clickhouse at localhost:9000 in 'project' as admin")
+    msg = "[Clickhouse] Connected to Clickhouse at localhost:9000 in 'project' as admin"
+    print(msg)
+    ch_client.execute(QUERIES['insert_log'], msg)
     #ch_client.execute(QUERIES['init_db'])
 except Exception as e:
-    print(f"Caught exception while connecting to localhost:9000 - {e}")
+    msg = f"[Clickhouse] Caught exception while connecting to localhost:9000 - {e}"
+    print(msg)
+    ch_client.execute(QUERIES['insert_log'], msg)

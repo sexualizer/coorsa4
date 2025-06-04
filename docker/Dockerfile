@@ -1,9 +1,23 @@
 FROM apache/airflow:2.9.2
 
-ENV API_KEY #your_token
-ENV PYTHONPATH=/opt/airflow/app:$PYTHONPATH
+USER root
 
-# COPY ./airflow/dags /opt/airflow/dags
+# Установка системных зависимостей
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        python3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# COPY ./app /opt/app
+# Копирование всего проекта
+COPY ../src /opt/airflow/src
+COPY ../requirements.txt /opt/airflow/
 
+# Установка Python-зависимостей
+RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+# Настройка путей
+ENV PYTHONPATH=/opt/airflow/src:$PYTHONPATH
+ENV AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
+
+USER airflow

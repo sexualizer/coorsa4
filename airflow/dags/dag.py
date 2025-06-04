@@ -12,6 +12,8 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from dotenv import load_dotenv
 
+from src.utils.queries import QUERIES
+
 load_dotenv()
 
 default_args = {
@@ -25,8 +27,8 @@ default_args = {
 
 def update_data():
     try:
-        from app.utils.stealer import Stealer
-        from app.utils.db import get_ch_client
+        from src.utils.stealer import Stealer
+        from src.utils.db import get_ch_client
 
         token = os.getenv("API_TOKEN")
 
@@ -35,8 +37,13 @@ def update_data():
 
         stealer.update_matches()
 
+        msg = f"[Airflow] Updated"
+        print(msg)
+        ch_client.execute(QUERIES['insert_log'], msg)
     except Exception as e:
-        print(f"Failed to update matches: {str(e)}")
+        msg = f"[Airflow] Failed to update matches: {str(e)}"
+        print(msg)
+        ch_client.execute(QUERIES['insert_log'], msg)
 
 with DAG(
     'pipe',

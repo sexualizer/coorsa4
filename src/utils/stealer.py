@@ -13,8 +13,8 @@ from typing import List, Dict
 from dotenv import load_dotenv
 #from kafka import KafkaProducer
 
-from app.utils.db import Client
-from app.utils.queries import QUERIES
+from src.utils.db import Client
+from src.utils.queries import QUERIES
 
 load_dotenv()
 token = os.getenv("API_TOKEN")
@@ -98,7 +98,7 @@ class Stealer:
     def update_matches(self):
         """Initial method"""
         existing_ids = self.get_existing_match_ids()
-        matches = self.fetch_matches(days=15) #Put a number of days here
+        matches = self.fetch_matches(days=3) #Put a number of days here
 
         new_matches = [
             self.transform_match(m)
@@ -108,10 +108,14 @@ class Stealer:
 
         #print(new_matches)
         if new_matches:
-            self.ch_client.execute(QUERIES['insert_matches'] ,new_matches)
-            print(f"Inserted {len(new_matches)} new matches")
+            self.ch_client.execute(QUERIES['insert_matches'], new_matches)
+            msg = f"[Clickhouse] Inserted {len(new_matches)} new matches"
+            print(msg)
+            self.ch_client.execute(QUERIES['insert_log'], msg)
         else:
-            print("New matches are not found")
+            msg = "New matches are not found"
+            print(msg)
+            self.ch_client.execute(QUERIES['insert_log'], msg)
 
         # if new_matches:
         #     success_count = 0

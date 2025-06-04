@@ -11,9 +11,9 @@ import requests
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
-from app.utils.stealer import Stealer
-#from app.kafka.consumer import Consumer
-from app.utils.db import get_ch_client
+from src.utils.stealer import Stealer
+#from src.kafka.consumer import Consumer
+from src.utils.db import get_ch_client
 
 load_dotenv()
 token = os.getenv("API_TOKEN")
